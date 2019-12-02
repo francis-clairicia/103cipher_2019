@@ -125,6 +125,7 @@ class Matrix:
             new_matrix[j, i] = self.mat[i, j]
         return new_matrix
 
+    @property
     def determinant(self):
         if self.lines != self.columns:
             raise ValueError(f"I can't have the determinant of {self.lines}x{self.columns} !")
@@ -140,11 +141,11 @@ class Matrix:
                 for m in range(1, self.lines + 1) if m != i
             ]
             comatrix = Matrix.from_2d_list(comatrix)
-            determinant += pow(-1, i + j) * self.mat[i, j] * comatrix.determinant()
+            determinant += pow(-1, i + j) * self.mat[i, j] * comatrix.determinant
         return determinant
 
     def invert(self):
-        det_mat = self.determinant()
+        det_mat = self.determinant
         if det_mat == 0:
             raise ValueError("Determinant is null, can't invert matrix")
         new_matrix = Matrix(self.lines, self.columns)
@@ -154,7 +155,7 @@ class Matrix:
                 for m in range(1, self.lines + 1) if m != i
             ]
             comatrix = Matrix.from_2d_list(comatrix)
-            new_matrix[i, j] = pow(-1, i + j) * comatrix.determinant()
+            new_matrix[i, j] = pow(-1, i + j) * comatrix.determinant
         return (1 / det_mat) * new_matrix.transposition()
 
     def coords(self):

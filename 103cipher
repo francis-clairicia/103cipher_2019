@@ -14,8 +14,7 @@ from cryptage import encrypt, decrypt
 
 def print_usage(error):
     print("USAGE")
-    print("\t" + "./103cipher message key flag")
-    print()
+    print("\t" + "./103cipher message key flag" + "\n")
     print("DESCRIPTION")
     print("\t" + "message" + "\t" + "a message, made of ASCII characters")
     print("\t" + "key" + "\t" + "the encryption key, made of ASCII characters")
@@ -27,7 +26,12 @@ def generate_key_matrix(key, flag):
     key_matrix = Matrix(n, n)
     for letter, coord in zip(key, key_matrix.coords()):
         key_matrix[coord] = ord(letter)
-    return key_matrix if flag == 0 else key_matrix.invert()
+    if flag == 1:
+        if key_matrix.determinant == 0:
+            print("Bad key token")
+            sys.exit(84)
+        key_matrix = key_matrix.invert()
+    return key_matrix
 
 def generate_message_matrix(message, key_matrix, flag):
     n = int(math.ceil(len(message) / key_matrix.lines))
@@ -37,13 +41,18 @@ def generate_message_matrix(message, key_matrix, flag):
             message_matrix[coord] = ord(letter)
     else:
         for number, coord in zip(message.split(), message_matrix.coords()):
-            message_matrix[coord] = int(number)
+            try:
+                message_matrix[coord] = int(number)
+            except ValueError:
+                sys.exit(84)
     return message_matrix
 
 def main(argc, argv):
     if argc != 4:
         print_usage(argc == 2 and argv[1] == "-h")
     try:
+        if '.' in argv[3]:
+            raise ValueError
         flag = int(argv[3])
         if flag not in [0, 1]:
             raise ValueError
@@ -51,11 +60,9 @@ def main(argc, argv):
         sys.exit(84)
     key_matrix = generate_key_matrix(sys.argv[2], flag)
     message_matrix = generate_message_matrix(sys.argv[1], key_matrix, flag)
-    action, output = [encrypt, decrypt][flag](key_matrix, message_matrix)
-    print("Key matrix:")
-    print(key_matrix)
-    print()
-    print(f"{action} message:")
+    output = [encrypt, decrypt][flag](key_matrix, message_matrix)
+    print("Key matrix:", key_matrix, "", sep='\n')
+    print("{} message:".format(["Encrypted", "Decrypted"][flag]))
     print(output)
 
 if __name__ == "__main__":

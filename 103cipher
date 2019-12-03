@@ -19,10 +19,10 @@ def print_usage(error):
     print("\t" + "message" + "\t" + "a message, made of ASCII characters")
     print("\t" + "key" + "\t" + "the encryption key, made of ASCII characters")
     print("\t" + "flag" + "\t" + "0 for the message to be encrypted, 1 to be decrypted")
-    sys.exit(84 * (not error))
+    sys.exit(84 * error)
 
 def generate_key_matrix(key, flag):
-    n = int(math.ceil(math.sqrt(len(key))))
+    n = math.ceil(math.sqrt(len(key)))
     key_matrix = Matrix(n, n)
     for letter, coord in zip(key, key_matrix.coords()):
         key_matrix[coord] = ord(letter)
@@ -34,32 +34,24 @@ def generate_key_matrix(key, flag):
     return key_matrix
 
 def generate_message_matrix(message, key_matrix, flag):
-    n = int(math.ceil(len(message) / key_matrix.lines))
+    message = message.split() if flag == 1 else message
+    n = math.ceil(len(message) / key_matrix.lines)
     message_matrix = Matrix(n, key_matrix.lines)
-    if flag == 0:
-        for letter, coord in zip(message, message_matrix.coords()):
-            message_matrix[coord] = ord(letter)
-    else:
-        for number, coord in zip(message.split(), message_matrix.coords()):
-            try:
-                message_matrix[coord] = int(number)
-            except ValueError:
-                sys.exit(84)
+    try:
+        for element, coord in zip(message, message_matrix.coords()):
+            message_matrix[coord] = ord(element) if flag == 0 else int(element)
+    except ValueError:
+        sys.exit(84)
     return message_matrix
 
 def main(argc, argv):
     if argc != 4:
-        print_usage(argc == 2 and argv[1] == "-h")
-    try:
-        if '.' in argv[3]:
-            raise ValueError
-        flag = int(argv[3])
-        if flag not in [0, 1]:
-            raise ValueError
-    except ValueError:
+        print_usage(not (argc == 2 and argv[1] == "-h"))
+    if argv[3] not in ["0", "1"]:
         sys.exit(84)
-    key_matrix = generate_key_matrix(sys.argv[2], flag)
-    message_matrix = generate_message_matrix(sys.argv[1], key_matrix, flag)
+    flag = int(argv[3])
+    key_matrix = generate_key_matrix(argv[2], flag)
+    message_matrix = generate_message_matrix(argv[1], key_matrix, flag)
     output = [encrypt, decrypt][flag](key_matrix, message_matrix)
     print("Key matrix:", key_matrix, "", sep='\n')
     print("{} message:".format(["Encrypted", "Decrypted"][flag]))

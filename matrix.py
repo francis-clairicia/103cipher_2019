@@ -125,6 +125,13 @@ class Matrix:
             new_matrix[j, i] = self.mat[i, j]
         return new_matrix
 
+    def get_comatrix(self, i, j):
+        comatrix = [
+            [self.mat[m, n] for n in range(1, self.columns + 1) if n != j] \
+            for m in range(1, self.lines + 1) if m != i
+        ]
+        return Matrix.from_2d_list(comatrix)
+
     @property
     def determinant(self):
         if self.lines != self.columns:
@@ -136,12 +143,7 @@ class Matrix:
         determinant = 0
         for i in range(1, self.lines + 1):
             j = 1
-            comatrix = [
-                [self.mat[m, n] for n in range(1, self.columns + 1) if n != j] \
-                for m in range(1, self.lines + 1) if m != i
-            ]
-            comatrix = Matrix.from_2d_list(comatrix)
-            determinant += pow(-1, i + j) * self.mat[i, j] * comatrix.determinant
+            determinant += pow(-1, i + j) * self.mat[i, j] * self.get_comatrix(i, j).determinant
         return determinant
 
     def invert(self):
@@ -150,16 +152,14 @@ class Matrix:
             raise ValueError("Determinant is null, can't invert matrix")
         new_matrix = Matrix(self.lines, self.columns)
         for i, j in new_matrix.coords():
-            comatrix = [
-                [self.mat[m, n] for n in range(1, self.columns + 1) if n != j] \
-                for m in range(1, self.lines + 1) if m != i
-            ]
-            comatrix = Matrix.from_2d_list(comatrix)
-            new_matrix[i, j] = pow(-1, i + j) * comatrix.determinant
+            new_matrix[i, j] = pow(-1, i + j) * self.get_comatrix(i, j).determinant
         return (1 / det_mat) * new_matrix.transposition()
 
     def coords(self):
         return self.mat.keys()
+
+    def values(self):
+        return self.mat.values()
 
     def reset(self):
         for coord in self.mat:

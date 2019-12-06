@@ -26,9 +26,6 @@ def generate_key_matrix(key, flag):
     key_matrix = Matrix(n, n)
     for letter, coord in zip(key, key_matrix.coords()):
         key_matrix[coord] = ord(letter)
-    if key_matrix.determinant == 0:
-        print("Invalid key")
-        sys.exit(84)
     if flag == 1:
         key_matrix = key_matrix.invert()
     return key_matrix

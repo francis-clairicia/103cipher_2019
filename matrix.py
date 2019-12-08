@@ -42,6 +42,11 @@ class Matrix:
             m[i, i] = 1
         return m
 
+    def copy(self):
+        l = self.lines + 1
+        c = self.columns + 1
+        return Matrix.from_2d_list([[self.mat[i, j] for j in range(1, c)] for i in range(1, l)])
+
     def __repr__(self):
         matrix_str = ""
         for i, j in self.mat:
@@ -140,10 +145,29 @@ class Matrix:
             return self[1, 1]
         if self.lines == 2:
             return (self.mat[1, 1] * self.mat[2, 2]) - (self.mat[2, 1] * self.mat[1, 2])
-        determinant = 0
-        for i in range(1, self.lines + 1):
-            j = 1
-            determinant += pow(-1, i + j) * self.mat[i, j] * self.get_comatrix(i, j).determinant
+        mat = self.copy()
+        determinant = 1
+        n = self.lines + 1
+        for j in range(1, n - 1):
+            k = j
+            coeff_max = 0
+            for i in range(j + 1, n):
+                if abs(coeff_max) < abs(mat[i, j]):
+                    k = i
+                    coeff_max = mat[i, j]
+            if coeff_max == 0:
+                determinant = 0
+                break
+            if k != j:
+                for i in range(j, n):
+                    mat[j, i], mat[k, i] = mat[k, i], mat[j, i]
+                determinant *= -1
+            determinant *= coeff_max
+            for k in range(j + 1, n):
+                coeff = mat[k, j] / coeff_max
+                for i in range(1, n):
+                    mat[k, i] -= (coeff * mat[j, i])
+        determinant *= mat[n - 1, n - 1]
         return determinant
 
     def invert(self):

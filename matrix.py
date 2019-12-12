@@ -174,6 +174,8 @@ class Matrix:
         det_mat = self.determinant
         if det_mat == 0:
             raise ValueError("Determinant is null, can't invert matrix")
+        if self.lines == 1:
+            return Matrix.from_2d_list([[1 / self.mat[1, 1]]])
         new_matrix = Matrix(self.lines, self.columns)
         for i, j in new_matrix.coords():
             new_matrix[i, j] = pow(-1, i + j) * self.get_comatrix(i, j).determinant
